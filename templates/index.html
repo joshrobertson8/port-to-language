@@ -10,7 +10,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Text Translator</h1>
+        <h1>Contextual Chat Translator</h1>
         
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -20,7 +20,9 @@
           {% endif %}
         {% endwith %}
 
+        <!-- Existing Form for Text and File Translation -->
         <form method="POST" action="{{ url_for('home') }}" class="translate-form" enctype="multipart/form-data">
+            <!-- Removed CSRF Token Reference -->
             <div class="form-group">
                 <label for="text">Enter text to translate:</label>
                 <input type="text" id="text" name="text" placeholder="Type your text here...">
@@ -78,241 +80,392 @@
                 </div>
             </div>
         {% endif %}
-    </div>
 
-    <!-- Share Modal -->
-    <div id="share-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h3>Share Translation</h3>
-            <div class="share-options">
-                <a href="#" id="share-facebook" target="_blank"><i class="fab fa-facebook-f"></i> Facebook</a>
-                <a href="#" id="share-twitter" target="_blank"><i class="fab fa-twitter"></i> Twitter</a>
-                <a href="#" id="share-email" target="_blank"><i class="fas fa-envelope"></i> Email</a>
-                <a href="#" id="share-whatsapp" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-                <!-- Add more platforms as needed -->
+        <!-- New Chat Interface Positioned at the Bottom -->
+        <div class="chat-interface">
+            <h2>Conversational Translator</h2>
+            <div id="chat-box" class="chat-box">
+                <!-- Chat messages will appear here -->
+            </div>
+            <form id="chat-form" class="chat-form">
+                <input type="text" id="chat-input" name="chat_input" placeholder="Type your message here..." autocomplete="off" required>
+                <button type="submit" class="action-button"><i class="fas fa-paper-plane"></i> Send</button>
+            </form>
+            <div class="language-selection">
+                <!-- Source Language Custom Dropdown -->
+                <div class="form-group">
+                    <label for="source_language">Source Language:</label>
+                    <div class="select-wrapper">
+                        <div class="custom-select" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">
+                            <div class="select-selected" aria-label="Select source language">Select a language</div>
+                            <div class="select-items" role="listbox">
+                                <div role="option" tabindex="0">English</div>
+                                <div role="option" tabindex="0">Spanish</div>
+                                <div role="option" tabindex="0">French</div>
+                                <div role="option" tabindex="0">German</div>
+                                <div role="option" tabindex="0">Chinese</div>
+                                <div role="option" tabindex="0">Japanese</div>
+                                <div role="option" tabindex="0">Korean</div>
+                                <div role="option" tabindex="0">Italian</div>
+                                <div role="option" tabindex="0">Portuguese</div>
+                                <div role="option" tabindex="0">Russian</div>
+                                <div role="option" tabindex="0">Arabic</div>
+                                <!-- Add more languages as needed -->
+                            </div>
+                        </div>
+                        <!-- Hidden input to store the selected value -->
+                        <input type="hidden" id="source_language" name="source_language" required aria-label="Selected source language">
+                    </div>
+                </div>
+
+                <!-- Target Language Custom Dropdown -->
+                <div class="form-group">
+                    <label for="target_language_chat">Target Language:</label>
+                    <div class="select-wrapper">
+                        <div class="custom-select" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">
+                            <div class="select-selected" aria-label="Select target language">Select a language</div>
+                            <div class="select-items" role="listbox">
+                                <div role="option" tabindex="0">English</div>
+                                <div role="option" tabindex="0">Spanish</div>
+                                <div role="option" tabindex="0">French</div>
+                                <div role="option" tabindex="0">German</div>
+                                <div role="option" tabindex="0">Chinese</div>
+                                <div role="option" tabindex="0">Japanese</div>
+                                <div role="option" tabindex="0">Korean</div>
+                                <div role="option" tabindex="0">Italian</div>
+                                <div role="option" tabindex="0">Portuguese</div>
+                                <div role="option" tabindex="0">Russian</div>
+                                <div role="option" tabindex="0">Arabic</div>
+                                <!-- Add more languages as needed -->
+                            </div>
+                        </div>
+                        <!-- Hidden input to store the selected value -->
+                        <input type="hidden" id="target_language_chat" name="target_language_chat" required aria-label="Selected target language">
+                    </div>
+                </div>
+            </div>
+            <button id="new-convo-button" class="action-button"><i class="fas fa-redo"></i> New Conversation</button>
+        </div>
+
+        <!-- Share Modal -->
+        <div id="share-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h3>Share Translation</h3>
+                <div class="share-options">
+                    <a href="#" id="share-facebook" target="_blank"><i class="fab fa-facebook-f"></i> Facebook</a>
+                    <a href="#" id="share-twitter" target="_blank"><i class="fab fa-twitter"></i> Twitter</a>
+                    <a href="#" id="share-email" target="_blank"><i class="fas fa-envelope"></i> Email</a>
+                    <a href="#" id="share-whatsapp" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                    <!-- Add more platforms as needed -->
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- JavaScript for Custom Dropdown Functionality, Drag-and-Drop, and Button Actions -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Custom Dropdown Functionality
-            const customSelect = document.querySelector('.custom-select');
-            const selected = customSelect.querySelector('.select-selected');
-            const optionsContainer = customSelect.querySelector('.select-items');
-            const options = optionsContainer.querySelectorAll('div[role="option"]');
-            const hiddenInput = document.getElementById('target_language');
+        <!-- JavaScript for Custom Dropdown Functionality, Drag-and-Drop, and Button Actions -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Custom Dropdown Functionality for Multiple Dropdowns
+                const customSelects = document.querySelectorAll('.custom-select');
 
-            // Toggle dropdown on click
-            selected.addEventListener('click', function(e) {
-                e.stopPropagation();
-                closeAllSelect(this);
-                optionsContainer.classList.toggle('show');
-                selected.classList.toggle('open');
-                const isExpanded = selected.classList.contains('open');
-                customSelect.setAttribute('aria-expanded', isExpanded);
-            });
+                customSelects.forEach(function(customSelect) {
+                    const selected = customSelect.querySelector('.select-selected');
+                    const optionsContainer = customSelect.querySelector('.select-items');
+                    const options = optionsContainer.querySelectorAll('div[role="option"]');
+                    const hiddenInput = customSelect.nextElementSibling; // Assuming the hidden input is immediately after the custom select
 
-            // Handle option click
-            options.forEach(function(option) {
-                option.addEventListener('click', function(e) {
-                    selected.innerText = this.innerText;
-                    hiddenInput.value = this.innerText;
-                    optionsContainer.classList.remove('show');
-                    selected.classList.remove('open');
-                    customSelect.setAttribute('aria-expanded', 'false');
-                });
-            });
-
-            // Close all dropdowns if clicked outside
-            document.addEventListener('click', closeAllSelect);
-
-            function closeAllSelect(elmnt) {
-                const allSelectItems = document.querySelectorAll('.select-items');
-                const allSelected = document.querySelectorAll('.select-selected');
-                allSelectItems.forEach(function(item) {
-                    if (item !== optionsContainer) {
-                        item.classList.remove('show');
-                    }
-                });
-                allSelected.forEach(function(item) {
-                    if (item !== selected) {
-                        item.classList.remove('open');
-                    }
-                });
-                // Update aria-expanded
-                customSelect.setAttribute('aria-expanded', 'false');
-            }
-
-            // Keyboard accessibility
-            customSelect.addEventListener('keydown', function(e) {
-                const key = e.key;
-                if (key === 'Enter' || key === ' ') {
-                    e.preventDefault();
-                    selected.click();
-                } else if (key === 'ArrowDown') {
-                    e.preventDefault();
-                    if (!optionsContainer.classList.contains('show')) {
-                        selected.click();
-                    }
-                    const firstOption = optionsContainer.querySelector('div[role="option"]');
-                    if (firstOption) {
-                        firstOption.focus();
-                    }
-                }
-            });
-
-            options.forEach(function(option) {
-                option.addEventListener('keydown', function(e) {
-                    const key = e.key;
-                    if (key === 'Enter' || key === ' ') {
-                        e.preventDefault();
-                        this.click();
-                    } else if (key === 'ArrowDown') {
-                        e.preventDefault();
-                        if (this.nextElementSibling) {
-                            this.nextElementSibling.focus();
-                        }
-                    } else if (key === 'ArrowUp') {
-                        e.preventDefault();
-                        if (this.previousElementSibling) {
-                            this.previousElementSibling.focus();
-                        } else {
-                            selected.focus();
-                        }
-                    }
-                });
-            });
-
-            // Drag and Drop File Upload Functionality
-            const dropArea = document.getElementById('drop-area');
-            const fileInput = document.getElementById('file');
-
-            // Prevent default behaviors
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dropArea.addEventListener(eventName, preventDefaults, false);
-                document.body.addEventListener(eventName, preventDefaults, false);
-            });
-
-            function preventDefaults (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-
-            // Highlight drop area when item is dragged over it
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropArea.addEventListener(eventName, highlight, false);
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropArea.addEventListener(eventName, unhighlight, false);
-            });
-
-            function highlight(e) {
-                dropArea.classList.add('highlight');
-            }
-
-            function unhighlight(e) {
-                dropArea.classList.remove('highlight');
-            }
-
-            // Handle dropped files
-            dropArea.addEventListener('drop', handleDrop, false);
-
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                if (files.length > 0) {
-                    fileInput.files = files;
-                    // Display the file name
-                    const fileName = files[0].name;
-                    dropArea.querySelector('p').textContent = fileName;
-                }
-            }
-
-            // Handle file input click
-            dropArea.addEventListener('click', () => {
-                fileInput.click();
-            });
-
-            // Handle file input change
-            fileInput.addEventListener('change', () => {
-                if (fileInput.files.length > 0) {
-                    const fileName = fileInput.files[0].name;
-                    dropArea.querySelector('p').textContent = fileName;
-                    // Optionally, auto-submit the form
-                    // document.querySelector('.translate-form').submit();
-                }
-            });
-
-            // Copy Button Functionality
-            const copyButton = document.getElementById('copy-button');
-            const translationText = document.getElementById('translation-text');
-
-            copyButton.addEventListener('click', function() {
-                const textToCopy = translationText.innerText;
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    // Optional: Provide user feedback
-                    copyButton.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                    setTimeout(() => {
-                        copyButton.innerHTML = '<i class="fas fa-copy"></i> Copy';
-                    }, 2000);
-                }).catch(err => {
-                    console.error('Failed to copy text: ', err);
-                });
-            });
-
-            // Share Button Functionality with Fallback Modal
-            const shareButton = document.getElementById('share-button');
-            const shareModal = document.getElementById('share-modal');
-            const closeButton = document.querySelector('.close-button');
-            const shareFacebook = document.getElementById('share-facebook');
-            const shareTwitter = document.getElementById('share-twitter');
-            const shareEmail = document.getElementById('share-email');
-            const shareWhatsApp = document.getElementById('share-whatsapp');
-            // Add more platforms as needed
-
-            shareButton.addEventListener('click', function() {
-                const textToShare = translationText.innerText;
-                if (navigator.share) {
-                    navigator.share({
-                        title: 'Translation',
-                        text: textToShare,
-                    }).then(() => {
-                        console.log('Translation shared successfully');
-                    }).catch((error) => {
-                        console.error('Error sharing:', error);
+                    // Toggle dropdown on click
+                    selected.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        closeAllSelect(customSelect);
+                        optionsContainer.classList.toggle('show');
+                        selected.classList.toggle('open');
+                        const isExpanded = selected.classList.contains('open');
+                        customSelect.setAttribute('aria-expanded', isExpanded);
                     });
-                } else {
-                    // Fallback: Open share modal
-                    shareModal.style.display = 'block';
 
-                    // Set share links dynamically
-                    const encodedText = encodeURIComponent(textToShare);
-                    const pageURL = encodeURIComponent(window.location.href);
+                    // Handle option click
+                    options.forEach(function(option) {
+                        option.addEventListener('click', function(e) {
+                            selected.innerText = this.innerText;
+                            hiddenInput.value = this.innerText;
+                            optionsContainer.classList.remove('show');
+                            selected.classList.remove('open');
+                            customSelect.setAttribute('aria-expanded', 'false');
+                        });
+                    });
 
-                    shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${pageURL}&quote=${encodedText}`;
-                    shareTwitter.href = `https://twitter.com/intent/tweet?text=${encodedText}&url=${pageURL}`;
-                    shareEmail.href = `mailto:?subject=Translation&body=${encodedText}`;
-                    shareWhatsApp.href = `https://api.whatsapp.com/send?text=${encodedText}`;
-                    // Add more share links as needed
+                    // Keyboard accessibility for each option
+                    options.forEach(function(option) {
+                        option.addEventListener('keydown', function(e) {
+                            const key = e.key;
+                            if (key === 'Enter' || key === ' ') {
+                                e.preventDefault();
+                                this.click();
+                            } else if (key === 'ArrowDown') {
+                                e.preventDefault();
+                                if (this.nextElementSibling) {
+                                    this.nextElementSibling.focus();
+                                }
+                            } else if (key === 'ArrowUp') {
+                                e.preventDefault();
+                                if (this.previousElementSibling) {
+                                    this.previousElementSibling.focus();
+                                } else {
+                                    selected.focus();
+                                }
+                            }
+                        });
+                    });
+
+                    // Keyboard accessibility for the custom select
+                    customSelect.addEventListener('keydown', function(e) {
+                        const key = e.key;
+                        if (key === 'Enter' || key === ' ') {
+                            e.preventDefault();
+                            selected.click();
+                        } else if (key === 'ArrowDown') {
+                            e.preventDefault();
+                            if (!optionsContainer.classList.contains('show')) {
+                                selected.click();
+                            }
+                            const firstOption = optionsContainer.querySelector('div[role="option"]');
+                            if (firstOption) {
+                                firstOption.focus();
+                            }
+                        }
+                    });
+                });
+
+                // Function to close all other select dropdowns
+                function closeAllSelect(currentSelect) {
+                    const allSelects = document.querySelectorAll('.custom-select');
+                    allSelects.forEach(function(select) {
+                        if (select !== currentSelect) {
+                            const optionsContainer = select.querySelector('.select-items');
+                            const selected = select.querySelector('.select-selected');
+                            optionsContainer.classList.remove('show');
+                            selected.classList.remove('open');
+                            select.setAttribute('aria-expanded', 'false');
+                        }
+                    });
                 }
-            });
 
-            // Close modal when clicking the close button
-            closeButton.addEventListener('click', function() {
-                shareModal.style.display = 'none';
-            });
+                // Close all dropdowns if clicked outside
+                document.addEventListener('click', closeAllSelect);
 
-            // Close modal when clicking outside the modal content
-            window.addEventListener('click', function(event) {
-                if (event.target == shareModal) {
+                // Drag and Drop File Upload Functionality
+                const dropArea = document.getElementById('drop-area');
+                const fileInput = document.getElementById('file');
+
+                // Prevent default behaviors
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, preventDefaults, false);
+                    document.body.addEventListener(eventName, preventDefaults, false);
+                });
+
+                function preventDefaults (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                // Highlight drop area when item is dragged over it
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, highlight, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, unhighlight, false);
+                });
+
+                function highlight(e) {
+                    dropArea.classList.add('highlight');
+                }
+
+                function unhighlight(e) {
+                    dropArea.classList.remove('highlight');
+                }
+
+                // Handle dropped files
+                dropArea.addEventListener('drop', handleDrop, false);
+
+                function handleDrop(e) {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    if (files.length > 0) {
+                        fileInput.files = files;
+                        // Display the file name
+                        const fileName = files[0].name;
+                        dropArea.querySelector('p').textContent = fileName;
+                    }
+                }
+
+                // Handle file input click
+                dropArea.addEventListener('click', () => {
+                    fileInput.click();
+                });
+
+                // Handle file input change
+                fileInput.addEventListener('change', () => {
+                    if (fileInput.files.length > 0) {
+                        const fileName = fileInput.files[0].name;
+                        dropArea.querySelector('p').textContent = fileName;
+                        // Optionally, auto-submit the form
+                        // document.querySelector('.translate-form').submit();
+                    }
+                });
+
+                // Copy Button Functionality
+                const copyButton = document.getElementById('copy-button');
+                const translationText = document.getElementById('translation-text');
+
+                copyButton.addEventListener('click', function() {
+                    const textToCopy = translationText.innerText;
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        // Optional: Provide user feedback
+                        copyButton.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        setTimeout(() => {
+                            copyButton.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Failed to copy text: ', err);
+                    });
+                });
+
+                // Share Button Functionality with Fallback Modal
+                const shareButton = document.getElementById('share-button');
+                const shareModal = document.getElementById('share-modal');
+                const closeButton = document.querySelector('.close-button');
+                const shareFacebook = document.getElementById('share-facebook');
+                const shareTwitter = document.getElementById('share-twitter');
+                const shareEmail = document.getElementById('share-email');
+                const shareWhatsApp = document.getElementById('share-whatsapp');
+                // Add more platforms as needed
+
+                shareButton.addEventListener('click', function() {
+                    const textToShare = translationText.innerText;
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'Translation',
+                            text: textToShare,
+                        }).then(() => {
+                            console.log('Translation shared successfully');
+                        }).catch((error) => {
+                            console.error('Error sharing:', error);
+                        });
+                    } else {
+                        // Fallback: Open share modal
+                        shareModal.style.display = 'block';
+
+                        // Set share links dynamically
+                        const encodedText = encodeURIComponent(textToShare);
+                        const pageURL = encodeURIComponent(window.location.href);
+
+                        shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${pageURL}&quote=${encodedText}`;
+                        shareTwitter.href = `https://twitter.com/intent/tweet?text=${encodedText}&url=${pageURL}`;
+                        shareEmail.href = `mailto:?subject=Translation&body=${encodedText}`;
+                        shareWhatsApp.href = `https://api.whatsapp.com/send?text=${encodedText}`;
+                        // Add more share links as needed
+                    }
+                });
+
+                // Close modal when clicking the close button
+                closeButton.addEventListener('click', function() {
                     shareModal.style.display = 'none';
+                });
+
+                // Close modal when clicking outside the modal content
+                window.addEventListener('click', function(event) {
+                    if (event.target == shareModal) {
+                        shareModal.style.display = 'none';
+                    }
+                });
+
+                // Chat Functionality
+                const chatForm = document.getElementById('chat-form');
+                const chatInput = document.getElementById('chat-input');
+                const chatBox = document.getElementById('chat-box');
+                const newConvoButton = document.getElementById('new-convo-button');
+                const sourceLanguageSelect = document.getElementById('source_language');
+                const targetLanguageChatSelect = document.getElementById('target_language_chat');
+
+                chatForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const userMessage = chatInput.value.trim();
+                    const sourceLanguage = sourceLanguageSelect.value;
+                    const targetLanguage = targetLanguageChatSelect.value;
+
+                    if (userMessage === "" || sourceLanguage === "" || targetLanguage === "") return;
+
+                    // Display user message
+                    appendMessage('user', userMessage);
+
+                    // Send message to the server via Fetch API
+                    fetch('{{ url_for("chat") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                            // Removed 'X-CSRFToken' since CSRF protection is not implemented
+                        },
+                        body: JSON.stringify({ 
+                            message: userMessage,
+                            source_language: sourceLanguage,
+                            target_language: targetLanguage
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.translation) {
+                            appendMessage('bot', data.translation);
+                        } else if (data.error) {
+                            appendMessage('bot', "Error: " + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        appendMessage('bot', "An unexpected error occurred.");
+                    });
+
+                    // Clear input
+                    chatInput.value = '';
+                });
+
+                function appendMessage(sender, message) {
+                    const messageElement = document.createElement('div');
+                    messageElement.classList.add('message', sender);
+                    messageElement.innerText = message;
+                    chatBox.appendChild(messageElement);
+                    chatBox.scrollTop = chatBox.scrollHeight;
                 }
+
+                // Reset Conversation Functionality
+                newConvoButton.addEventListener('click', function() {
+                    // Clear chat box
+                    chatBox.innerHTML = '';
+                    // Reset language selections
+                    sourceLanguageSelect.value = '';
+                    targetLanguageChatSelect.value = '';
+                    // Optionally, inform the server to reset the session
+                    fetch('{{ url_for("reset_chat") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                            // Removed 'X-CSRFToken' since CSRF protection is not implemented
+                        },
+                        body: JSON.stringify({})
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Optionally, display a confirmation
+                            appendMessage('bot', 'Conversation has been reset.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
             });
-        });
-    </script>
-</body>
-</html>
+        </script>
+    </body>
+    </html>

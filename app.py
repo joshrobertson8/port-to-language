@@ -1,7 +1,7 @@
 # app.py
 
 import os
-from flask import Flask, request, render_template, flash, redirect, url_for, abort
+from flask import Flask, request, render_template, flash, redirect, url_for, jsonify, session
 import google.generativeai as genai
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
@@ -13,7 +13,7 @@ from werkzeug.exceptions import RequestEntityTooLarge
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")  # Needed for flashing messages
+app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")  # Needed for flashing messages and session
 
 # Configure Generative AI with API key from environment variables
 genai.configure(api_key=os.getenv("GENAI_API_KEY"))
@@ -28,6 +28,9 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 # Ensure the upload folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Maximum conversation history length
+MAX_CONVERSATION_LENGTH = 10  # Adjust as needed
 
 def allowed_file(filename):
     """Check if the file has an allowed extension."""
@@ -62,7 +65,7 @@ def translate_text(text, target_language):
         response = model.generate_content(
             contents=[{"role": "user", "parts": [prompt]}],
             generation_config=genai.GenerationConfig(
-                max_output_tokens=10000,  # Increased token limit for longer texts
+                max_output_tokens=2000,  # Increased token limit for longer texts
                 temperature=0.5,
             ),
         )
@@ -125,6 +128,72 @@ def home():
                     flash("An error occurred during translation. Please try again.", "error")
 
     return render_template("index.html", translation=translation)
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    """Handle chat messages for conversational translation."""
+    data = request.get_json()
+    user_message = data.get('message', '').strip()
+    source_language = data.get('source_language', '').strip()
+    target_language = data.get('target_language', '').strip()
+
+    if not user_message:
+        return jsonify({'error': 'Empty message received.'}), 400
+    if not source_language or not target_language:
+        return jsonify({'error': 'Source and target languages must be selected.'}), 400
+
+    # Retrieve or initialize conversation history from the session
+    conversation = session.get('conversation', [])
+
+    # Append the user's message to the conversation with language context
+    conversation.append({'role': 'user', 'content': user_message, 'source_language': source_language, 'target_language': target_language})
+
+    # Truncate conversation history if it exceeds the maximum length
+    if len(conversation) > MAX_CONVERSATION_LENGTH:
+        conversation = conversation[-MAX_CONVERSATION_LENGTH:]
+        session['conversation'] = conversation
+    else:
+        session['conversation'] = conversation
+
+    # Construct the prompt with conversation history for context
+    prompt = ""
+    for entry in conversation:
+        role = "User" if entry['role'] == 'user' else "Bot"
+        lang = f" ({entry['source_language']} -> {entry['target_language']})" if entry['role'] == 'user' else ""
+        prompt += f"{role}{lang}: {entry['content']}\n"
+
+    # Add the translation instruction
+    prompt += "Bot: "
+
+    try:
+        model = genai.GenerativeModel(model_name="models/gemini-1.5-flash")
+        response = model.generate_content(
+            contents=[{"role": "user", "parts": [prompt]}],
+            generation_config=genai.GenerationConfig(
+                max_output_tokens=2000,
+                temperature=0.5,
+            ),
+        )
+        bot_reply = response.candidates[0].content.parts[0].text.strip()
+
+        # Append the bot's reply to the conversation with language context
+        conversation.append({'role': 'bot', 'content': bot_reply, 'source_language': target_language, 'target_language': source_language})
+
+        # Truncate conversation history if it exceeds the maximum length
+        if len(conversation) > MAX_CONVERSATION_LENGTH:
+            conversation = conversation[-MAX_CONVERSATION_LENGTH:]
+        session['conversation'] = conversation
+
+        return jsonify({'translation': bot_reply}), 200
+    except Exception as e:
+        print(f"Error during chat translation: {e}")
+        return jsonify({'error': 'An error occurred during translation.'}), 500
+
+@app.route("/reset_chat", methods=["POST"])
+def reset_chat():
+    """Reset the conversation history."""
+    session.pop('conversation', None)
+    return jsonify({'status': 'success'}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
