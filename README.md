@@ -1,6 +1,6 @@
 # Advanced Text Translator
 
-![Logo](static/ss4.png)
+![Screenshot](static/ss4.png)
 
 ## Table of Contents
 - [Overview](#overview)
