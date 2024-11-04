@@ -20,8 +20,8 @@
 
 **Advanced Text Translator** is a comprehensive web application designed to provide seamless translation services. Built using the Flask framework, this tool allows users to translate text and files between multiple languages effortlessly. Additionally, it features an **Interactive Conversational Translator** that enables real-time, context-aware translations through a chat-like interface, enhancing user engagement and translation accuracy.
 
-![Screenshot]((ss2.png))
-![Screenshot]((ss3.png))
+![Screenshot](ss2.png)
+![Screenshot](ss3.png)
 
 ## Features
 - **Text Translation**: Translate input text between a wide range of languages.
