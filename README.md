@@ -1,4 +1,4 @@
-# Advanced Text Translator
+# Port To Language
 
 ![Screenshot](static/ss4.png)
 
@@ -18,7 +18,7 @@
 
 ## Overview
 
-**Advanced Text Translator** is a comprehensive web application designed to provide seamless translation services. Built using the Flask framework, this tool allows users to translate text and files between multiple languages effortlessly. Additionally, it features an **Interactive Conversational Translator** that enables real-time, context-aware translations through a chat-like interface, enhancing user engagement and translation accuracy.
+**Port To Language** is a web application designed to provide translation services. Built using the Flask framework, this tool allows users to translate text and files between multiple languages. Additionally, it features an **Interactive Conversational Translator** that enables real-time, context-aware translations through a chat-like interface, enhancing user engagement and translation accuracy. All translation services leverage Gemini 1.5 Flash API for functionality. 
 
 ![Screenshot](static/ss2.png)
 ![Screenshot](static/ss3.png)
