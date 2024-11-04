@@ -1,0 +1,490 @@
+/* Import Google Fonts for better typography */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+:root {
+    --button-bg: rgba(76, 175, 80, 0.8);
+    --button-hover-bg: rgba(69, 160, 73, 0.9);
+    --button-text-color: white;
+    --overlay-bg: rgba(0, 0, 0, 0.3);
+    --overlay-hover-bg: rgba(0, 0, 0, 0.4);
+    --text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    --background-color: rgba(255, 255, 255, 0.2);
+    --translation-bg: rgba(255, 255, 255, 0.1);
+    --flash-error-bg: rgba(248, 215, 218, 0.9);
+    --flash-error-text: #721c24;
+    --flash-success-bg: rgba(212, 237, 218, 0.9);
+    --flash-success-text: #155724;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-image: url("/static/background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Container styling with Glassmorphism effect */
+.container {
+    width: 90%;
+    max-width: 600px;
+    background: var(--background-color); /* Semi-transparent background */
+    border-radius: 12px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(10px); /* Blurs the background behind the container */
+    -webkit-backdrop-filter: blur(10px); /* For Safari support */
+    border: 1px solid rgba(255, 255, 255, 0.18); /* Subtle border for depth */
+    padding: 30px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.37);
+}
+
+/* Header styling */
+h1 {
+    color: #ffffff;
+    font-size: 2rem;
+    margin-bottom: 25px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Form styling */
+.translate-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers child elements horizontally */
+    width: 100%;
+}
+
+/* Label styling */
+form label {
+    font-size: 1rem;
+    color: #ffffff; /* Changed to white for better contrast against transparent background */
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+/* Input styling */
+form input[type="text"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Semi-transparent border */
+    border-radius: 6px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.1); /* Slightly transparent input background */
+    color: #ffffff; /* White text for readability */
+    transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+form input[type="text"]::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+form input[type="text"]:focus {
+    border-color: #4CAF50;
+    outline: none;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Custom Dropdown Styling */
+.select-wrapper {
+    width: 100%;
+}
+
+.custom-select {
+    width: 100%;
+}
+
+.select-selected {
+    background: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
+    border-radius: 6px;
+    padding: 12px 15px;
+    cursor: pointer;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.select-selected:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.select-selected:after {
+    content: '';
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    display: inline-block;
+    padding: 4px;
+    transform: rotate(45deg);
+    transition: transform 0.3s ease;
+    margin-left: 10px;
+}
+
+.select-selected.open:after {
+    transform: rotate(-135deg);
+}
+
+.select-items {
+    background: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
+    border-radius: 6px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(10px); /* Blurs the background behind the options */
+    -webkit-backdrop-filter: blur(10px); /* For Safari support */
+    border: 1px solid rgba(255, 255, 255, 0.18); /* Subtle border for depth */
+    z-index: 99;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 5px;
+    display: none; /* Hidden by default */
+    flex-direction: column;
+}
+
+.select-items.show {
+    display: flex;
+}
+
+.select-items div {
+    padding: 12px 15px;
+    cursor: pointer;
+    color: #ffffff;
+    transition: background 0.3s ease;
+}
+
+.select-items div:hover {
+    background: rgba(76, 175, 80, 0.8);
+}
+
+/* Drag and Drop File Upload Styling */
+.drop-area {
+    position: relative;
+    border: 2px dashed rgba(255, 255, 255, 0.5);
+    border-radius: 6px;
+    padding: 30px;
+    text-align: center;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background 0.3s ease, border-color 0.3s ease;
+    width: 100%; /* Full width by default */
+    max-width: 400px; /* Limits the maximum width */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Centers content vertically within the drop area */
+}
+
+.drop-area.highlight {
+    background: rgba(76, 175, 80, 0.2);
+    border-color: rgba(76, 175, 80, 1);
+}
+
+.drop-area i {
+    margin-bottom: 10px;
+    font-size: 2.5rem; /* Increased size for better visibility */
+}
+
+.drop-area p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+/* Hide the actual file input */
+.drop-area input[type="file"] {
+    display: none;
+}
+
+/* Button Group Styling */
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+    flex-wrap: wrap; /* Allows buttons to wrap on smaller screens */
+}
+
+/* Action Buttons (Translate, Copy & Share) */
+.action-button {
+    background-image: url('/static/button.jpg'); /* Set button.jpg as background */
+    background-size: cover; /* Adjust as needed */
+    background-position: center;
+    background-repeat: no-repeat;
+    color: var(--button-text-color);
+    border: none;
+    padding: 12px 25px;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    text-shadow: var(--text-shadow); /* Enhances text readability */
+    min-width: 100px; /* Ensures buttons are not too small */
+}
+
+.action-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--overlay-bg); /* Semi-transparent overlay */
+    border-radius: 6px;
+    transition: background 0.3s ease;
+    pointer-events: none;
+}
+
+.action-button:hover::before {
+    background: var(--overlay-hover-bg);
+}
+
+.action-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.action-button:active {
+    transform: scale(0.95);
+}
+
+/* Translation Output Styling */
+.translation-output {
+    background: var(--translation-bg); /* Slightly transparent background */
+    padding: 20px;
+    border-radius: 8px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.translation-output p {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #ffffff;
+    line-height: 1.6;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background for text */
+    padding: 15px;
+    border-radius: 6px;
+    word-wrap: break-word;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Flash messages styling */
+.flash {
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    color: #ffffff;
+    width: 100%;
+    text-align: left;
+}
+
+.flash.error {
+    background-color: var(--flash-error-bg);
+    color: var(--flash-error-text);
+}
+
+.flash.success {
+    background-color: var(--flash-success-bg);
+    color: var(--flash-success-text);
+}
+
+/* Share Modal Styling */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 100; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: rgba(255, 255, 255, 0.2);
+    margin: 5% auto; /* Reduced margin for better fit on smaller screens */
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    width: 90%;
+    max-width: 400px; /* Could be more or less, depending on screen size */
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    text-align: center;
+}
+
+.close-button {
+    color: #ffffff;
+    float: right;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #ddd;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.share-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.share-options a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+    padding: 10px 15px;
+    background-color: var(--button-bg);
+    color: var(--button-text-color);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    min-width: 100px;
+}
+
+.share-options a:hover {
+    background-color: var(--button-hover-bg);
+    transform: scale(1.05);
+}
+
+.share-options a i {
+    margin-right: 8px;
+    color: #ffffff; /* Ensure icons are visible */
+}
+
+/* Responsive Design */
+
+/* Tablets and Small Desktops */
+@media (min-width: 601px) and (max-width: 1024px) {
+    .container {
+        max-width: 700px;
+    }
+
+    h1 {
+        font-size: 2.25rem;
+    }
+
+    .action-button {
+        font-size: 1.125rem;
+        padding: 14px 30px;
+    }
+
+    .translation-output p {
+        font-size: 1.25rem;
+    }
+}
+
+/* Large Desktops */
+@media (min-width: 1025px) {
+    .container {
+        max-width: 800px;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    .action-button {
+        font-size: 1.25rem;
+        padding: 16px 35px;
+    }
+
+    .translation-output p {
+        font-size: 1.375rem;
+    }
+}
+
+/* Mobile Devices */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    .translate-form {
+        gap: 15px;
+    }
+
+    .action-button {
+        padding: 10px 20px;
+        font-size: 0.875rem;
+    }
+
+    .share-options a {
+        padding: 8px 12px;
+        margin: 5px;
+        font-size: 0.875rem;
+        min-width: 80px;
+    }
+
+    .translation-output p {
+        font-size: 1rem;
+        padding: 12px;
+    }
+
+    .flash {
+        font-size: 0.75rem;
+    }
+
+    /* Adjust Drop Area */
+    .drop-area {
+        padding: 20px;
+    }
+
+    .drop-area i {
+        font-size: 2rem;
+    }
+
+    .drop-area p {
+        font-size: 0.875rem;
+    }
+}
